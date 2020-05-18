@@ -16,11 +16,11 @@ namespace Tello.Test
         {
             var rule = CommandRules.Rules("forward");
             Assert.IsNotNull(rule);
-            Assert.AreEqual(Commands.Forward, rule.Command);
+            Assert.AreEqual(CommandCode.Forward, rule.CommandCode);
 
             rule = CommandRules.Rules("command");
             Assert.IsNotNull(rule);
-            Assert.AreEqual(Commands.EnterSdkMode, rule.Command);
+            Assert.AreEqual(CommandCode.EnterSdkMode, rule.CommandCode);
         }
 
         [TestMethod]

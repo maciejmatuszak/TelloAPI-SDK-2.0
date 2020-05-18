@@ -15,19 +15,19 @@ namespace Tello
     {
         #region ctor
         public Command()
-            : this(Commands.EnterSdkMode)
+            : this(CommandCode.EnterSdkMode)
         {
         }
 
-        public Command(Commands command)
-            : this(command, null)
+        public Command(CommandCode commandCode)
+            : this(commandCode, null)
         {
         }
 
-        public Command(Commands command, params object[] args)
+        public Command(CommandCode commandCode, params object[] args)
         {
-            this.Rule = CommandRules.Rules(command);
-            this.Validate(command, args);
+            this.Rule = CommandRules.Rules(commandCode);
+            this.Validate(commandCode, args);
             this.Arguments = args;
             this.Immediate = this.Rule.Immediate;
         }
@@ -54,14 +54,14 @@ namespace Tello
         public CommandRule Rule { get; }
 
         #region operators
-        public static implicit operator Command(Commands command)
+        public static implicit operator Command(CommandCode commandCode)
         {
-            return new Command(command);
+            return new Command(commandCode);
         }
 
-        public static implicit operator Commands(Command command)
+        public static implicit operator CommandCode(Command command)
         {
-            return command.Rule.Command;
+            return command.Rule.CommandCode;
         }
 
         public static explicit operator Command(byte[] bytes)
@@ -106,12 +106,12 @@ namespace Tello
 
             if (rule.Arguments.Length != tokens.Length - 1)
             {
-                throw new ArgumentOutOfRangeException($"{rule.Command}: argument count mismatch. expected: {rule.Arguments.Length} actual: {tokens.Length - 1}");
+                throw new ArgumentOutOfRangeException($"{rule.CommandCode}: argument count mismatch. expected: {rule.Arguments.Length} actual: {tokens.Length - 1}");
             }
 
             if (rule.Arguments.Length == 0)
             {
-                return new Command(rule.Command);
+                return new Command(rule.CommandCode);
             }
             else
             {
@@ -121,13 +121,13 @@ namespace Tello
                     args[i] = Convert.ChangeType(tokens[i + 1], rule.Arguments[i].Type);
                 }
 
-                return new Command(rule.Command, args);
+                return new Command(rule.CommandCode, args);
             }
         }
 
-        public static explicit operator Responses(Command command)
+        public static explicit operator ResponseHandleCode(Command command)
         {
-            return command.Rule.Response;
+            return command.Rule.ResponseHandleCode;
         }
 
         // todo: move command timeouts to command rules
@@ -137,67 +137,67 @@ namespace Tello
             var arcspeed = 15.0; // degrees/s (tested at 30 degress/second, but want to add some margin for error)
             double distance;
 
-            switch (command.Rule.Command)
+            switch (command.Rule.CommandCode)
             {
-                case Commands.EnterSdkMode:
-                case Commands.EmergencyStop:
-                case Commands.GetSpeed:
-                case Commands.GetBattery:
-                case Commands.GetTime:
-                case Commands.GetWIFISnr:
-                case Commands.GetSdkVersion:
-                case Commands.GetSerialNumber:
+                case CommandCode.EnterSdkMode:
+                case CommandCode.EmergencyStop:
+                case CommandCode.GetSpeed:
+                case CommandCode.GetBattery:
+                case CommandCode.GetTime:
+                case CommandCode.GetWIFISnr:
+                case CommandCode.GetSdkVersion:
+                case CommandCode.GetSerialNumber:
                     return TimeSpan.FromSeconds(30);
 
                 // todo: if I knew the set speed in cm/s I could get a better timeout value
-                case Commands.Left:
-                case Commands.Right:
-                case Commands.Forward:
-                case Commands.Back:
+                case CommandCode.Left:
+                case CommandCode.Right:
+                case CommandCode.Forward:
+                case CommandCode.Back:
                     distance = (int)command.Arguments[0]; // cm
                     return TimeSpan.FromSeconds(distance / avgspeed * 10);
 
-                case Commands.Go:
+                case CommandCode.Go:
                     var x = (int)command.Arguments[0];
                     var y = (int)command.Arguments[1];
                     distance = Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
                     return TimeSpan.FromSeconds(distance / avgspeed * 10);
 
-                case Commands.ClockwiseTurn:
-                case Commands.CounterClockwiseTurn:
+                case CommandCode.ClockwiseTurn:
+                case CommandCode.CounterClockwiseTurn:
                     var degrees = (int)command.Arguments[0];
                     return TimeSpan.FromSeconds(degrees / arcspeed * 10);
 
-                case Commands.Takeoff:
-                case Commands.SetSpeed:
-                case Commands.SetRemoteControl:
-                case Commands.SetWiFiPassword:
-                case Commands.SetStationMode:
-                case Commands.StartVideo:
-                case Commands.StopVideo:
-                case Commands.Flip:
-                case Commands.Curve:
-                case Commands.Land:
-                case Commands.Stop:
-                case Commands.Up:
-                case Commands.Down:
+                case CommandCode.Takeoff:
+                case CommandCode.SetSpeed:
+                case CommandCode.SetRemoteControl:
+                case CommandCode.SetWiFiPassword:
+                case CommandCode.SetStationMode:
+                case CommandCode.StartVideo:
+                case CommandCode.StopVideo:
+                case CommandCode.Flip:
+                case CommandCode.Curve:
+                case CommandCode.Land:
+                case CommandCode.Stop:
+                case CommandCode.Up:
+                case CommandCode.Down:
                 default:
                     return TimeSpan.FromSeconds(60);
             }
         }
         #endregion
 
-        private void Validate(Commands command, params object[] args)
+        private void Validate(CommandCode commandCode, params object[] args)
         {
             if (args == null && this.Rule.Arguments.Length > 0)
             {
-                throw new ArgumentNullException($"{command}: {nameof(args)}");
+                throw new ArgumentNullException($"{commandCode}: {nameof(args)}");
             }
 
             if (args != null && args.Length != this.Rule.Arguments.Length)
             {
                 throw new ArgumentException(
-                    $"{command}: argument count mismatch. expected: {this.Rule.Arguments.Length} actual: {(args == null ? 0 : args.Length)}");
+                    $"{commandCode}: argument count mismatch. expected: {this.Rule.Arguments.Length} actual: {(args == null ? 0 : args.Length)}");
             }
 
             if (this.Rule.Arguments.Length > 0)
@@ -207,25 +207,25 @@ namespace Tello
                     var arg = args[i];
                     if (arg == null)
                     {
-                        throw new ArgumentNullException($"{command}: {nameof(args)}[{i}]");
+                        throw new ArgumentNullException($"{commandCode}: {nameof(args)}[{i}]");
                     }
 
                     var argumentRule = this.Rule.Arguments[i];
                     if (!argumentRule.IsTypeAllowed(arg))
                     {
-                        throw new ArgumentException($"{command}: {nameof(args)}[{i}] type mismatch. expected: '{argumentRule.Type.Name}' actual: '{arg.GetType().Name}'");
+                        throw new ArgumentException($"{commandCode}: {nameof(args)}[{i}] type mismatch. expected: '{argumentRule.Type.Name}' actual: '{arg.GetType().Name}'");
                     }
 
                     if (!argumentRule.IsValueAllowed(Convert.ChangeType(arg, argumentRule.Type)))
                     {
-                        throw new ArgumentOutOfRangeException($"{command}: {nameof(args)}[{i}] argument out of range: {arg}");
+                        throw new ArgumentOutOfRangeException($"{commandCode}: {nameof(args)}[{i}] argument out of range: {arg}");
                     }
                 }
 
-                switch (command)
+                switch (commandCode)
                 {
-                    case Commands.Go:
-                    case Commands.Curve:
+                    case CommandCode.Go:
+                    case CommandCode.Curve:
                         var twentyCount = 0;
                         for (var i = 0; i < args.Length - 1; ++i)
                         {
@@ -234,7 +234,7 @@ namespace Tello
                                 : 0;
                             if (twentyCount > 1)
                             {
-                                throw new ArgumentOutOfRangeException($"{command}: {nameof(args)} x, y and z can't match /[-20-20]/ simultaneously.");
+                                throw new ArgumentOutOfRangeException($"{commandCode}: {nameof(args)} x, y and z can't match /[-20-20]/ simultaneously.");
                             }
                         }
 
@@ -246,7 +246,7 @@ namespace Tello
         public override string ToString()
         {
             return CommandRules
-                .Rules(this.Rule.Command)
+                .Rules(this.Rule.CommandCode)
                 .ToString(this.Arguments);
         }
     }

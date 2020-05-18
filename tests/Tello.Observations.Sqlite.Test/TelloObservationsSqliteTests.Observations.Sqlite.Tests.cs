@@ -113,7 +113,7 @@ namespace Tello.Entities.Sqlite.Test
                 Assert.AreEqual(1, group.Id);
                 Assert.AreEqual(start, group.Timestamp);
 
-                var request = new TelloRequest(Commands.Takeoff);
+                var request = new TelloRequest(CommandCode.Takeoff);
                 var ok = "ok";
                 var okBytes = Encoding.UTF8.GetBytes(ok);
                 IResponse<string> response = new TelloResponse(request, okBytes, TimeSpan.FromSeconds(1));
@@ -126,7 +126,7 @@ namespace Tello.Entities.Sqlite.Test
                 Assert.AreEqual(1, observation.Id);
                 Assert.AreEqual(1, observation.GroupId);
                 Assert.AreEqual(request.Timestamp, observation.TimeInitiated);
-                Assert.AreEqual(Commands.Takeoff, observation.Command.Rule.Command);
+                Assert.AreEqual(CommandCode.Takeoff, observation.Command.Rule.CommandCode);
                 Assert.AreEqual("ok", observation.Response);
             }
         }

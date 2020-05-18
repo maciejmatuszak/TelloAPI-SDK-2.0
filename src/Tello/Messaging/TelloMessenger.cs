@@ -28,9 +28,9 @@ namespace Tello.Messaging
             this.commands.Enqueue(command);
         }
 
-        public Task<TelloResponse> SendAsync(Commands command, params object[] args)
+        public Task<TelloResponse> SendAsync(CommandCode commandCode, params object[] args)
         {
-            return this.SendAsync(new Command(command, args));
+            return this.SendAsync(new Command(commandCode, args));
         }
 
         public async Task<TelloResponse> SendAsync(Command command)
