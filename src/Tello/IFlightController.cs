@@ -6,6 +6,7 @@
 using System;
 using System.Threading.Tasks;
 using Tello.Events;
+using Tello.Messaging;
 using Tello.State;
 
 namespace Tello
@@ -200,5 +201,7 @@ namespace Tello
         void GetSdkVersion();
 
         void GetSerialNumber();
+
+        void Enqueue(TelloRequest request);
     }
 }

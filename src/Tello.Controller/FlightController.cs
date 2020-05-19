@@ -280,6 +280,11 @@ namespace Tello.Controller
             await this.messenger.SendAsync(CommandCode.GetSerialNumber);
         }
 
+        public void Enqueue(TelloRequest request)
+        {
+            this.messenger.Enqueue(request);
+        }
+
         public async void GetWIFISNR()
         {
             await this.messenger.SendAsync(CommandCode.GetWIFISnr);

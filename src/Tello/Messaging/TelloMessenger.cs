@@ -14,7 +14,7 @@ namespace Tello.Messaging
 {
     public class TelloMessenger : Messenger<string>
     {
-        private readonly ConcurrentQueue<Command> commands = new ConcurrentQueue<Command>();
+        private readonly ConcurrentQueue<TelloRequest> commands = new ConcurrentQueue<TelloRequest>();
         private readonly ITransceiver transceiver;
 
         public TelloMessenger(ITransceiver transceiver)
@@ -23,9 +23,9 @@ namespace Tello.Messaging
             this.ProcessCommandQueueAsync();
         }
 
-        private void Enqueue(Command command)
+        public void Enqueue(TelloRequest request)
         {
-            this.commands.Enqueue(command);
+            this.commands.Enqueue(request);
         }
 
         public Task<TelloResponse> SendAsync(CommandCode commandCode, params object[] args)
@@ -42,7 +42,7 @@ namespace Tello.Messaging
             else
             {
                 Debug.WriteLine($"{nameof(this.SendAsync)}: '{command}' command queue is {this.commands.Count} deep.");
-                this.Enqueue(command);
+                this.Enqueue(new TelloRequest(command));
                 return await Task.FromResult<TelloResponse>(null);
             }
         }
@@ -56,11 +56,10 @@ namespace Tello.Messaging
                 {
                     try
                     {
-                        if (!this.commands.IsEmpty && this.commands.TryDequeue(out var command))
+                        if (!this.commands.IsEmpty && this.commands.TryDequeue(out var request))
                         {
                             Debug.WriteLine($"{nameof(this.ProcessCommandQueueAsync)}: command queue is {this.commands.Count} deep.");
 
-                            var request = new TelloRequest(command);
                             Debug.WriteLine($"{nameof(this.ProcessCommandQueueAsync)}: request.Message '{request.Message}'");
                             Debug.WriteLine($"{nameof(this.ProcessCommandQueueAsync)}: request.Timeout '{request.Timeout}'");
 
