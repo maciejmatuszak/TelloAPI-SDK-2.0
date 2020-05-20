@@ -14,5 +14,7 @@ namespace Messenger
         /// send request, receive response.
         /// </summary>
         Task<IResponse> SendAsync(IRequest request);
+
+        void CancelPendingTransmissions();
     }
 }

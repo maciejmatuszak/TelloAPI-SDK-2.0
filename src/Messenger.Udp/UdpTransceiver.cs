@@ -17,6 +17,7 @@ namespace Messenger.Udp
         private readonly IPEndPoint endPoint;
         private readonly UdpClient client = new UdpClient();
 
+
         public UdpTransceiver(IPAddress ipAddress, int port)
             : base()
         {
@@ -26,6 +27,7 @@ namespace Messenger.Udp
         protected override async Task<IResponse> Send(IRequest request)
         {
             await this.client.SendAsync(request.Data, request.Data.Length, this.endPoint);
+            this.Canceled = false;
 
             if (request.NoWait)
             {
@@ -36,12 +38,17 @@ namespace Messenger.Udp
             await Task.Run(() =>
             {
                 var spinWait = default(SpinWait);
-                while (this.client.Available == 0 && stopwatch.Elapsed <= request.Timeout)
+                while (this.client.Available == 0 && stopwatch.Elapsed <= request.Timeout && !this.Canceled)
                 {
                     spinWait.SpinOnce();
                 }
             });
             stopwatch.Stop();
+
+            if (this.Canceled)
+            {
+                return new Response(request, TimeSpan.Zero, false);
+            }
 
             if (this.client.Available == 0)
             {

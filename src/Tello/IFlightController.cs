@@ -203,5 +203,9 @@ namespace Tello
         void GetSerialNumber();
 
         void Enqueue(TelloRequest request);
+
+        void ResetMessenger();
+
+        Task<TelloResponse> SendAsync(Command command);
     }
 }

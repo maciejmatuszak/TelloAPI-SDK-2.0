@@ -13,11 +13,11 @@ using Tello.State;
 
 namespace Tello.Controller
 {
-    public sealed class FlightController : Observer<IResponse<string>>, IFlightController
+    public sealed class BlocklyFlightController : Observer<IResponse<string>>, IFlightController
     {
         private readonly TelloMessenger messenger;
 
-        public FlightController(ITransceiver transceiver)
+        public BlocklyFlightController(ITransceiver transceiver)
             : base()
         {
             this.messenger = new TelloMessenger(transceiver ?? throw new ArgumentNullException(nameof(transceiver)));
@@ -232,6 +232,9 @@ namespace Tello.Controller
         {
             if (!this.isConnected)
             {
+                // reset any pending commands
+                this.ResetMessenger();
+                
                 var response = await this.messenger.SendAsync(CommandCode.EnterSdkMode);
                 this.isConnected = response != null && response.Success;
                 if (this.isConnected)
@@ -249,6 +252,9 @@ namespace Tello.Controller
             if (this.isConnected)
             {
                 this.isConnected = false;
+                // reset any pending commands
+                this.ResetMessenger();
+                
                 this.ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedArgs(this.isConnected));
             }
         }
@@ -289,7 +295,7 @@ namespace Tello.Controller
         {
             this.messenger.Reset();
         }
-
+        
         public async Task<TelloResponse> SendAsync(Command command)
         {
             return await this.messenger.SendAsync(command);

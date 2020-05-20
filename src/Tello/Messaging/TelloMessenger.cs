@@ -28,6 +28,17 @@ namespace Tello.Messaging
             this.commands.Enqueue(request);
         }
 
+        
+        public void Reset()
+        {
+            TelloRequest someItem;
+            while (!this.commands.IsEmpty) 
+            {
+                this.commands.TryDequeue(out someItem);
+            }
+            this.transceiver.CancelPendingTransmissions();
+        }
+
         public Task<TelloResponse> SendAsync(CommandCode commandCode, params object[] args)
         {
             return this.SendAsync(new Command(commandCode, args));

@@ -23,9 +23,17 @@ namespace Messenger
                 return new Response(request, ex, stopwatch.Elapsed);
             }
         }
+        
+        public void CancelPendingTransmissions()
+        {
+            this.Canceled = true;
+        }
 
         protected abstract Task<IResponse> Send(IRequest request);
-
+        
+        protected bool Canceled = true;
+        
+        
         public abstract void Dispose();
     }
 }
