@@ -20,7 +20,7 @@ namespace Tello.Messaging
             : base(
                 (string)command,
                 (TimeSpan)command,
-                command.Rule.ResponseHandleCode == ResponseHandleCode.None)
+                command.Rule.Response == Responses.None)
         {
         }
 

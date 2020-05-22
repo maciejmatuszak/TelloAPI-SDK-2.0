@@ -95,7 +95,7 @@ namespace Tello.Simulator
 
         private string Invoke(Command command)
         {
-            if (command != CommandCode.EnterSdkMode && !this.inCommandMode)
+            if (command != Commands.EnterSdkMode && !this.inCommandMode)
             {
                 throw new TelloException("Call EnterSdkMode first.");
             }
@@ -105,25 +105,25 @@ namespace Tello.Simulator
                 throw new TelloException("Call Takeoff first.");
             }
 
-            switch (command.Rule.ResponseHandleCode)
+            switch (command.Rule.Response)
             {
-                case ResponseHandleCode.Ok:
+                case Responses.Ok:
                     this.HandleOk(command);
                     this.state = new TelloState(this.position);
                     return "ok";
-                case ResponseHandleCode.Speed:
+                case Responses.Speed:
                     return this.speed.ToString();
-                case ResponseHandleCode.Battery:
+                case Responses.Battery:
                     return "99";
-                case ResponseHandleCode.Time:
+                case Responses.Time:
                     return "0";
-                case ResponseHandleCode.WIFISnr:
+                case Responses.WIFISnr:
                     return "unk";
-                case ResponseHandleCode.SdkVersion:
+                case Responses.SdkVersion:
                     return "Sim V1";
-                case ResponseHandleCode.SerialNumber:
+                case Responses.SerialNumber:
                     return "SIM-1234";
-                case ResponseHandleCode.None:
+                case Responses.None:
                     return String.Empty;
                 default:
                     throw new NotSupportedException();
@@ -132,63 +132,63 @@ namespace Tello.Simulator
 
         private void HandleOk(Command command)
         {
-            switch ((CommandCode)command)
+            switch ((Commands)command)
             {
-                case CommandCode.EnterSdkMode:
+                case Commands.EnterSdkMode:
                     this.inCommandMode = true;
                     break;
 
-                case CommandCode.Takeoff:
+                case Commands.Takeoff:
                     this.height = 20;
                     this.isFlying = true;
                     break;
 
-                case CommandCode.EmergencyStop:
-                case CommandCode.Land:
+                case Commands.EmergencyStop:
+                case Commands.Land:
                     this.height = 0;
                     this.isFlying = false;
                     break;
 
-                case CommandCode.StartVideo:
+                case Commands.StartVideo:
                     this.isVideoStreaming = true;
                     break;
-                case CommandCode.StopVideo:
+                case Commands.StopVideo:
                     this.isVideoStreaming = false;
                     break;
 
-                case CommandCode.Left:
+                case Commands.Left:
                     this.position = this.position.Move(CardinalDirections.Left, (int)command.Arguments[0]);
                     break;
-                case CommandCode.Right:
+                case Commands.Right:
                     this.position = this.position.Move(CardinalDirections.Right, (int)command.Arguments[0]);
                     break;
-                case CommandCode.Forward:
+                case Commands.Forward:
                     this.position = this.position.Move(CardinalDirections.Front, (int)command.Arguments[0]);
                     break;
-                case CommandCode.Back:
+                case Commands.Back:
                     this.position = this.position.Move(CardinalDirections.Back, (int)command.Arguments[0]);
                     break;
-                case CommandCode.ClockwiseTurn:
+                case Commands.ClockwiseTurn:
                     this.position = this.position.Turn(ClockDirections.Clockwise, (int)command.Arguments[0]);
                     break;
-                case CommandCode.CounterClockwiseTurn:
+                case Commands.CounterClockwiseTurn:
                     this.position = this.position.Turn(ClockDirections.CounterClockwise, (int)command.Arguments[0]);
                     break;
-                case CommandCode.Go:
+                case Commands.Go:
                     this.position = this.position.Go((int)command.Arguments[0], (int)command.Arguments[1]);
                     break;
 
-                case CommandCode.SetSpeed:
+                case Commands.SetSpeed:
                     this.speed = (int)command.Arguments[0];
                     break;
 
-                case CommandCode.Stop:
+                case Commands.Stop:
                     break;
 
-                case CommandCode.Up:
+                case Commands.Up:
                     this.height += (int)command.Arguments[0];
                     break;
-                case CommandCode.Down:
+                case Commands.Down:
                     this.height -= (int)command.Arguments[0];
                     if (this.height < 0)
                     {
@@ -197,16 +197,16 @@ namespace Tello.Simulator
 
                     break;
 
-                case CommandCode.Curve:
+                case Commands.Curve:
                     break;
-                case CommandCode.Flip:
+                case Commands.Flip:
                     break;
 
-                case CommandCode.SetRemoteControl:
+                case Commands.SetRemoteControl:
                     break;
-                case CommandCode.SetWiFiPassword:
+                case Commands.SetWiFiPassword:
                     break;
-                case CommandCode.SetStationMode:
+                case Commands.SetStationMode:
                     break;
 
                 default:

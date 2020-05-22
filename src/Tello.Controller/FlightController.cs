@@ -38,73 +38,73 @@ namespace Tello.Controller
 
         private void HandleOk(IResponse<string> response, Command command)
         {
-            switch ((CommandCode)command)
+            switch ((Commands)command)
             {
-                case CommandCode.Takeoff:
+                case Commands.Takeoff:
                     this.isFlying = true;
                     break;
-                case CommandCode.Land:
-                case CommandCode.EmergencyStop:
+                case Commands.Land:
+                case Commands.EmergencyStop:
                     this.isFlying = false;
                     break;
-                case CommandCode.StartVideo:
+                case Commands.StartVideo:
                     this.isVideoStreaming = true;
                     this.VideoStreamingStateChanged?.Invoke(this, new VideoStreamingStateChangedArgs(this.isVideoStreaming));
                     break;
-                case CommandCode.StopVideo:
+                case Commands.StopVideo:
                     this.isVideoStreaming = false;
                     this.VideoStreamingStateChanged?.Invoke(this, new VideoStreamingStateChangedArgs(this.isVideoStreaming));
                     break;
 
-                case CommandCode.Left:
+                case Commands.Left:
                     this.Position = this.Position.Move(CardinalDirections.Left, (int)((Command)response.Request.Data).Arguments[0]);
                     this.PositionChanged?.Invoke(this, new PositionChangedArgs(this.Position));
                     break;
-                case CommandCode.Right:
+                case Commands.Right:
                     this.Position = this.Position.Move(CardinalDirections.Right, (int)((Command)response.Request.Data).Arguments[0]);
                     this.PositionChanged?.Invoke(this, new PositionChangedArgs(this.Position));
                     break;
-                case CommandCode.Forward:
+                case Commands.Forward:
                     this.Position = this.Position.Move(CardinalDirections.Front, (int)((Command)response.Request.Data).Arguments[0]);
                     this.PositionChanged?.Invoke(this, new PositionChangedArgs(this.Position));
                     break;
-                case CommandCode.Back:
+                case Commands.Back:
                     this.Position = this.Position.Move(CardinalDirections.Back, (int)((Command)response.Request.Data).Arguments[0]);
                     this.PositionChanged?.Invoke(this, new PositionChangedArgs(this.Position));
                     break;
-                case CommandCode.ClockwiseTurn:
+                case Commands.ClockwiseTurn:
                     this.Position = this.Position.Turn(ClockDirections.Clockwise, (int)((Command)response.Request.Data).Arguments[0]);
                     this.PositionChanged?.Invoke(this, new PositionChangedArgs(this.Position));
                     break;
-                case CommandCode.CounterClockwiseTurn:
+                case Commands.CounterClockwiseTurn:
                     this.Position = this.Position.Turn(ClockDirections.CounterClockwise, (int)((Command)response.Request.Data).Arguments[0]);
                     this.PositionChanged?.Invoke(this, new PositionChangedArgs(this.Position));
                     break;
-                case CommandCode.Go:
+                case Commands.Go:
                     this.Position = this.Position.Go((int)((Command)response.Request.Data).Arguments[0], (int)((Command)response.Request.Data).Arguments[1]);
                     this.PositionChanged?.Invoke(this, new PositionChangedArgs(this.Position));
                     break;
 
-                case CommandCode.SetSpeed:
+                case Commands.SetSpeed:
                     this.InterogativeState.Speed = (int)((Command)response.Request.Data).Arguments[0];
                     break;
 
-                case CommandCode.Stop:
+                case Commands.Stop:
                     break;
-                case CommandCode.Up:
+                case Commands.Up:
                     break;
-                case CommandCode.Down:
+                case Commands.Down:
                     break;
-                case CommandCode.Curve:
+                case Commands.Curve:
                     break;
-                case CommandCode.Flip:
+                case Commands.Flip:
                     break;
 
-                case CommandCode.SetRemoteControl:
+                case Commands.SetRemoteControl:
                     break;
-                case CommandCode.SetWiFiPassword:
+                case Commands.SetWiFiPassword:
                     break;
-                case CommandCode.SetStationMode:
+                case Commands.SetStationMode:
                     break;
 
                 default:
@@ -121,40 +121,40 @@ namespace Tello.Controller
 
                 if (response.Success)
                 {
-                    if (response.Message != ResponseHandleCode.Error.ToString().ToLowerInvariant())
+                    if (response.Message != Responses.Error.ToString().ToLowerInvariant())
                     {
-                        switch (command.Rule.ResponseHandleCode)
+                        switch (command.Rule.Response)
                         {
-                            case ResponseHandleCode.Ok:
-                                if (response.Message == ResponseHandleCode.Ok.ToString().ToLowerInvariant())
+                            case Responses.Ok:
+                                if (response.Message == Responses.Ok.ToString().ToLowerInvariant())
                                 {
                                     this.HandleOk(response, command);
                                 }
                                 else
                                 {
-                                    throw new TelloException($"'{command}' expecting response '{ResponseHandleCode.Ok.ToString().ToLowerInvariant()}' returned message '{response.Message}' at {response.Timestamp.ToString("o")} after {response.TimeTaken.TotalMilliseconds}ms");
+                                    throw new TelloException($"'{command}' expecting response '{Responses.Ok.ToString().ToLowerInvariant()}' returned message '{response.Message}' at {response.Timestamp.ToString("o")} after {response.TimeTaken.TotalMilliseconds}ms");
                                 }
 
                                 break;
-                            case ResponseHandleCode.Speed:
+                            case Responses.Speed:
                                 this.InterogativeState.Speed = Int32.Parse(response.Message);
                                 break;
-                            case ResponseHandleCode.Battery:
+                            case Responses.Battery:
                                 this.InterogativeState.Battery = Int32.Parse(response.Message);
                                 break;
-                            case ResponseHandleCode.Time:
+                            case Responses.Time:
                                 this.InterogativeState.Time = Int32.Parse(response.Message);
                                 break;
-                            case ResponseHandleCode.WIFISnr:
+                            case Responses.WIFISnr:
                                 this.InterogativeState.WIFISnr = response.Message;
                                 break;
-                            case ResponseHandleCode.SdkVersion:
+                            case Responses.SdkVersion:
                                 this.InterogativeState.SdkVersion = response.Message;
                                 break;
-                            case ResponseHandleCode.SerialNumber:
+                            case Responses.SerialNumber:
                                 this.InterogativeState.SerialNumber = response.Message;
                                 break;
-                            case ResponseHandleCode.None:
+                            case Responses.None:
                             default:
                                 break;
                         }
@@ -232,7 +232,7 @@ namespace Tello.Controller
         {
             if (!this.isConnected)
             {
-                var response = await this.messenger.SendAsync(CommandCode.EnterSdkMode);
+                var response = await this.messenger.SendAsync(Commands.EnterSdkMode);
                 this.isConnected = response != null && response.Success;
                 if (this.isConnected)
                 {
@@ -257,27 +257,27 @@ namespace Tello.Controller
         #region state interogation
         public async void GetBattery()
         {
-            await this.messenger.SendAsync(CommandCode.GetBattery);
+            await this.messenger.SendAsync(Commands.GetBattery);
         }
 
         public async void GetSdkVersion()
         {
-            await this.messenger.SendAsync(CommandCode.GetSdkVersion);
+            await this.messenger.SendAsync(Commands.GetSdkVersion);
         }
 
         public async void GetSpeed()
         {
-            await this.messenger.SendAsync(CommandCode.GetSpeed);
+            await this.messenger.SendAsync(Commands.GetSpeed);
         }
 
         public async void GetTime()
         {
-            await this.messenger.SendAsync(CommandCode.GetTime);
+            await this.messenger.SendAsync(Commands.GetTime);
         }
 
         public async void GetSerialNumber()
         {
-            await this.messenger.SendAsync(CommandCode.GetSerialNumber);
+            await this.messenger.SendAsync(Commands.GetSerialNumber);
         }
 
         public void ResetMessenger()
@@ -287,7 +287,7 @@ namespace Tello.Controller
 
         public async void GetWIFISNR()
         {
-            await this.messenger.SendAsync(CommandCode.GetWIFISnr);
+            await this.messenger.SendAsync(Commands.GetWIFISnr);
         }
         #endregion
 
@@ -296,7 +296,7 @@ namespace Tello.Controller
         {
             if (this.CanTakeoff)
             {
-                await this.messenger.SendAsync(CommandCode.Takeoff);
+                await this.messenger.SendAsync(Commands.Takeoff);
             }
         }
 
@@ -304,13 +304,13 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.Land);
+                await this.messenger.SendAsync(Commands.Land);
             }
         }
 
         public async Task EmergencyStop()
         {
-            await this.messenger.SendAsync(CommandCode.EmergencyStop);
+            await this.messenger.SendAsync(Commands.EmergencyStop);
             this.isFlying = false;
             this.Disconnect();
         }
@@ -319,7 +319,7 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.Stop);
+                await this.messenger.SendAsync(Commands.Stop);
             }
         }
 
@@ -327,9 +327,9 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                var cmd = new Command(CommandCode.SetRemoteControl, new object[] { leftRight, forwardBackward, upDown, yaw });
+                var cmd = new Command(Commands.SetRemoteControl, new object[] { leftRight, forwardBackward, upDown, yaw });
                 Debug.WriteLine(cmd.ToString());
-                await this.messenger.SendAsync(CommandCode.SetRemoteControl, leftRight, forwardBackward, upDown, yaw);
+                await this.messenger.SendAsync(Commands.SetRemoteControl, leftRight, forwardBackward, upDown, yaw);
             }
         }
 
@@ -337,7 +337,7 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.Curve, x1, y1, z1, x2, y2, z2, speed);
+                await this.messenger.SendAsync(Commands.Curve, x1, y1, z1, x2, y2, z2, speed);
             }
         }
 
@@ -345,7 +345,7 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.Flip, (char)(CardinalDirection)direction);
+                await this.messenger.SendAsync(Commands.Flip, (char)(CardinalDirection)direction);
             }
         }
 
@@ -393,7 +393,7 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.Go, x, y, z, speed);
+                await this.messenger.SendAsync(Commands.Go, x, y, z, speed);
             }
         }
 
@@ -401,7 +401,7 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.Back, cm);
+                await this.messenger.SendAsync(Commands.Back, cm);
             }
         }
 
@@ -409,7 +409,7 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.Down, cm);
+                await this.messenger.SendAsync(Commands.Down, cm);
             }
         }
 
@@ -417,7 +417,7 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.Forward, cm);
+                await this.messenger.SendAsync(Commands.Forward, cm);
             }
         }
 
@@ -425,7 +425,7 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.Left, cm);
+                await this.messenger.SendAsync(Commands.Left, cm);
             }
         }
 
@@ -433,7 +433,7 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.Right, cm);
+                await this.messenger.SendAsync(Commands.Right, cm);
             }
         }
 
@@ -441,7 +441,7 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.Up, cm);
+                await this.messenger.SendAsync(Commands.Up, cm);
             }
         }
 
@@ -449,7 +449,7 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.ClockwiseTurn, degress);
+                await this.messenger.SendAsync(Commands.ClockwiseTurn, degress);
             }
         }
 
@@ -457,7 +457,7 @@ namespace Tello.Controller
         {
             if (this.CanManeuver)
             {
-                await this.messenger.SendAsync(CommandCode.CounterClockwiseTurn, degress);
+                await this.messenger.SendAsync(Commands.CounterClockwiseTurn, degress);
             }
         }
 
@@ -497,7 +497,7 @@ namespace Tello.Controller
         {
             if (this.isConnected)
             {
-                await this.messenger.SendAsync(CommandCode.SetSpeed, speed);
+                await this.messenger.SendAsync(Commands.SetSpeed, speed);
             }
         }
 
@@ -505,7 +505,7 @@ namespace Tello.Controller
         {
             if (this.isConnected)
             {
-                await this.messenger.SendAsync(CommandCode.SetStationMode, ssid, password);
+                await this.messenger.SendAsync(Commands.SetStationMode, ssid, password);
             }
         }
 
@@ -513,7 +513,7 @@ namespace Tello.Controller
         {
             if (this.isConnected)
             {
-                await this.messenger.SendAsync(CommandCode.SetWiFiPassword, ssid, password);
+                await this.messenger.SendAsync(Commands.SetWiFiPassword, ssid, password);
             }
         }
         #endregion
@@ -523,7 +523,7 @@ namespace Tello.Controller
         {
             if (this.isConnected && !this.isVideoStreaming)
             {
-                await this.messenger.SendAsync(CommandCode.StartVideo);
+                await this.messenger.SendAsync(Commands.StartVideo);
             }
         }
 
@@ -531,7 +531,7 @@ namespace Tello.Controller
         {
             if (this.isConnected && this.isVideoStreaming)
             {
-                await this.messenger.SendAsync(CommandCode.StopVideo);
+                await this.messenger.SendAsync(Commands.StopVideo);
             }
         }
         #endregion

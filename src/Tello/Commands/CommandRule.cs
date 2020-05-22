@@ -16,24 +16,24 @@ namespace Tello
     public sealed class CommandRule
     {
         internal CommandRule(
-            CommandCode commandCode,
-            ResponseHandleCode responseHandleCode,
+            Commands command,
+            Responses response,
             string token,
             ArgumentRule[] arguments,
             bool mustBeInflight,
             bool immediate = false)
         {
-            this.CommandCode = commandCode;
-            this.ResponseHandleCode = responseHandleCode;
+            this.Command = command;
+            this.Response = response;
             this.Token = token;
             this.Arguments = arguments;
             this.MustBeInFlight = mustBeInflight;
             this.Immediate = immediate;
         }
 
-        public CommandCode CommandCode { get; }
+        public Commands Command { get; }
 
-        public ResponseHandleCode ResponseHandleCode { get; }
+        public Responses Response { get; }
 
         public string Token { get; }
 

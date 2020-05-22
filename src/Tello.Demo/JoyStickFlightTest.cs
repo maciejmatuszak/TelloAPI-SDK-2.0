@@ -125,8 +125,8 @@ namespace Tello.Demo
         private void Controller_ResponseReceived(object sender, Events.ResponseReceivedArgs e)
         {
             if (!this.canMove
-                && (Command)e.Response.Request.Data == CommandCode.Takeoff
-                && e.Response.Success && e.Response.Message == ResponseHandleCode.Ok.ToString().ToLowerInvariant())
+                && (Command)e.Response.Request.Data == Commands.Takeoff
+                && e.Response.Success && e.Response.Message == Responses.Ok.ToString().ToLowerInvariant())
             {
                 this.canMove = true;
             }

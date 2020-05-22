@@ -39,9 +39,9 @@ namespace Tello.Messaging
             this.transceiver.CancelPendingTransmissions();
         }
 
-        public Task<TelloResponse> SendAsync(CommandCode commandCode, params object[] args)
+        public Task<TelloResponse> SendAsync(Commands command, params object[] args)
         {
-            return this.SendAsync(new Command(commandCode, args));
+            return this.SendAsync(new Command(command, args));
         }
 
         public async Task<TelloResponse> SendAsync(Command command)

@@ -5,7 +5,7 @@
 
 namespace Tello
 {
-    public enum ResponseHandleCode
+    public enum Responses
     {
         Ok,
         Error,

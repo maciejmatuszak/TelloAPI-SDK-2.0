@@ -5,7 +5,7 @@
 
 namespace Tello
 {
-    public enum CommandCode
+    public enum Commands
     {
         EnterSdkMode,
         Takeoff,
