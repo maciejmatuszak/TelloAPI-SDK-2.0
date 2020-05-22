@@ -46,16 +46,27 @@ namespace Tello.Messaging
 
         public async Task<TelloResponse> SendAsync(Command command)
         {
+            var req = new TelloRequest(command);
             if (command.Immediate)
             {
-                return new TelloResponse(await this.transceiver.SendAsync(new TelloRequest(command)));
+                return await this.SendImmediateAssync(req);
             }
             else
             {
-                Debug.WriteLine($"{nameof(this.SendAsync)}: '{command}' command queue is {this.commands.Count} deep.");
-                this.Enqueue(new TelloRequest(command));
-                return await Task.FromResult<TelloResponse>(null);
+                return await this.SendViaQueueAssync(req);
             }
+        }
+
+        public async Task<TelloResponse> SendViaQueueAssync(TelloRequest req)
+        {
+            Debug.WriteLine($"{nameof(this.SendAsync)}: '{req.Message}' command queue is {this.commands.Count} deep.");
+            this.Enqueue(req);
+            return await Task.FromResult<TelloResponse>(null);
+        }
+
+        public async Task<TelloResponse> SendImmediateAssync(TelloRequest req)
+        {
+            return new TelloResponse(await this.transceiver.SendAsync(req));
         }
 
         private async void ProcessCommandQueueAsync()

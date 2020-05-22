@@ -1,6 +1,7 @@
 ﻿using System;
 using Messenger;
 using Tello.Events;
+using Tello.State;
 
 namespace Tello.Controller
 {
@@ -22,9 +23,9 @@ namespace Tello.Controller
             this.Controller = new BlocklyFlightController(this.transceiver);
 
             this.Controller.ConnectionStateChanged +=
-                (object sender, ConnectionStateChangedArgs e) =>
+                (object sender, ConnectionStateDetailedChangedArgs e) =>
                 {
-                    if (e.IsConnected)
+                    if (e.ConnectionState == ConnectionStateEnum.Connected)
                     {
                         this.StartLisenters();
                     }
@@ -57,7 +58,7 @@ namespace Tello.Controller
 
         #endregion
 
-        public IFlightController Controller { get; }
+        public BlocklyFlightController Controller { get; }
 
         public IStateObserver StateObserver { get; }
 

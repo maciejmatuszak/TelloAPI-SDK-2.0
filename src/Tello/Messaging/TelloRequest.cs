@@ -11,11 +11,16 @@ namespace Tello.Messaging
 {
     public sealed class TelloRequest : Request<string>
     {
+        public TelloRequest(string message, TimeSpan timeout, bool noWaitForResponse)
+            : base(message, timeout, noWaitForResponse)
+        {
+        }
+
         public TelloRequest(Command command)
             : base(
-                  (string)command,
-                  (TimeSpan)command,
-                  command.Rule.ResponseHandleCode == ResponseHandleCode.None)
+                (string)command,
+                (TimeSpan)command,
+                command.Rule.ResponseHandleCode == ResponseHandleCode.None)
         {
         }
 
